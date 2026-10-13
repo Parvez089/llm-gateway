@@ -10,6 +10,7 @@ const EnvSchema = z.object({
   GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required'),
   REDIS_URL: z.string().url(),
   MONGO_URL: z.string().url(),
+  ADMIN_KEY: z.string().min(32, 'ADMIN_KEY must be at least 32 chars'),
 });
 
 const parsed = EnvSchema.safeParse(process.env);
