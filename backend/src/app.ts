@@ -1,10 +1,12 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
-import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
+import {
+  serializerCompiler,
+  validatorCompiler,
+} from 'fastify-type-provider-zod';
 import { logger } from './lib/logger.js';
-import { redis } from './lib/redis.js';
-import mongoose from 'mongoose';
+import { registerRoutes } from './routes/index.js';
 
 export async function buildApp() {
   const app = Fastify({
@@ -20,20 +22,8 @@ export async function buildApp() {
   await app.register(cors, { origin: true });
   await app.register(helmet);
 
-  app.get('/health', async () => {
-    const redisOk = redis.status === 'ready';
-    const mongoOk = mongoose.connection.readyState === 1;
-
-    return {
-      status: redisOk && mongoOk ? 'ok' : 'degraded',
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-      services: {
-        redis: redisOk ? 'up' : 'down',
-        mongo: mongoOk ? 'up' : 'down',
-      },
-    };
-  });
+  // Register all routes
+  await app.register(registerRoutes);
 
   return app;
 }
