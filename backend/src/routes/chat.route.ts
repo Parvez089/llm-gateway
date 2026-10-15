@@ -5,6 +5,7 @@ import { routerEngine } from '../services/router/routerEngine.js';
 import { providerRegistry } from '../services/provider/providerRegistry.js';
 import { calculateCost } from '../services/cost/costCalculator.js';
 import { callWithFallback } from '../services/resilience/fallbackChain.js';
+import { logRequest } from '../services/logging/requestLogger.js';
 import { FALLBACK_CHAINS, MODELS } from '../config/models.js';
 
 export const chatRoute: FastifyPluginAsync = async (fastify) => {
@@ -15,6 +16,22 @@ export const chatRoute: FastifyPluginAsync = async (fastify) => {
       const parsed = ChatRequestSchema.safeParse(req.body);
 
       if (!parsed.success) {
+        logRequest({
+          requestId: req.id,
+          apiKeyId: req.apiKey!._id,
+          model: 'unknown',
+          tier: 'cheap',
+          routingScore: 0,
+          cacheHit: false,
+          fallbackUsed: false,
+          status: 400,
+          latencyMs: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          costUsd: 0,
+          errorType: 'INVALID_REQUEST',
+        });
+
         return reply.code(400).send({
           error: {
             code: 'INVALID_REQUEST',
@@ -37,6 +54,22 @@ export const chatRoute: FastifyPluginAsync = async (fastify) => {
       // 2. Get provider
       const provider = providerRegistry.get(modelConfig.provider);
       if (!provider) {
+        logRequest({
+          requestId: req.id,
+          apiKeyId: req.apiKey!._id,
+          model: firstModel,
+          tier,
+          routingScore: route.score,
+          cacheHit: false,
+          fallbackUsed: false,
+          status: 500,
+          latencyMs: Date.now() - startTime,
+          inputTokens: 0,
+          outputTokens: 0,
+          costUsd: 0,
+          errorType: 'PROVIDER_NOT_FOUND',
+        });
+
         return reply.code(500).send({
           error: {
             code: 'PROVIDER_NOT_FOUND',
@@ -72,6 +105,23 @@ export const chatRoute: FastifyPluginAsync = async (fastify) => {
           'Chat completed'
         );
 
+        // Log success (async, doesn't block response)
+        logRequest({
+          requestId: req.id,
+          apiKeyId: req.apiKey!._id,
+          model: result.modelUsed,
+          tier,
+          routingScore: route.score,
+          cacheHit: false,
+          fallbackUsed: result.fallbackUsed,
+          status: 200,
+          latencyMs,
+          inputTokens: result.response.inputTokens,
+          outputTokens: result.response.outputTokens,
+          costUsd,
+          errorType: null,
+        });
+
         const response: ChatResponse = {
           id: req.id,
           output: result.response.output,
@@ -92,7 +142,27 @@ export const chatRoute: FastifyPluginAsync = async (fastify) => {
 
         return reply.code(200).send(response);
       } catch (err) {
+        const latencyMs = Date.now() - startTime;
+
         req.log.error({ err }, 'All models in fallback chain failed');
+
+        // Log error
+        logRequest({
+          requestId: req.id,
+          apiKeyId: req.apiKey!._id,
+          model: firstModel,
+          tier,
+          routingScore: route.score,
+          cacheHit: false,
+          fallbackUsed: true,
+          status: 502,
+          latencyMs,
+          inputTokens: 0,
+          outputTokens: 0,
+          costUsd: 0,
+          errorType: 'LLM_ERROR',
+        });
+
         return reply.code(502).send({
           error: {
             code: 'LLM_ERROR',
