@@ -5,3 +5,8 @@ coverage/
 .env
 .env.local
 .env.*.local
+
+loadtest/results/*.json
+!loadtest/results/.gitkeep
+eval/results/*.json
+!eval/results/.gitkeep
