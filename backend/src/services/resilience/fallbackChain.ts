@@ -1,12 +1,14 @@
 import { logger } from '../../lib/logger.js';
 import type { LLMProvider, ProviderRequest, ProviderResponse } from '../provider/provider.interface.js';
 import { withRetry } from './retry.js';
+import { getCircuitState, recordFailure, recordSuccess } from './circuitBreaker.js';
 
 export type FallbackAttempt = {
   model: string;
   success: boolean;
   error?: unknown;
   latencyMs: number;
+  skipped?: boolean;
 };
 
 export type FallbackResult = {
@@ -27,6 +29,20 @@ export async function callWithFallback(
     const model = chain[i]!;
     const startTime = Date.now();
 
+    // Check circuit breaker
+    const state = await getCircuitState(model);
+
+    if (state === 'open') {
+      logger.warn({ model }, 'Circuit OPEN — skipping model');
+      attempts.push({
+        model,
+        success: false,
+        latencyMs: Date.now() - startTime,
+        skipped: true,
+      });
+      continue;
+    }
+
     try {
       const response = await withRetry(
         () =>
@@ -36,6 +52,9 @@ export async function callWithFallback(
           }),
         { maxAttempts: 2, baseDelayMs: 300 }
       );
+
+      // Success — reset circuit
+      await recordSuccess(model);
 
       attempts.push({
         model,
@@ -50,6 +69,9 @@ export async function callWithFallback(
         attempts,
       };
     } catch (err) {
+      // Record failure for circuit breaker
+      await recordFailure(model);
+
       attempts.push({
         model,
         success: false,
@@ -57,9 +79,11 @@ export async function callWithFallback(
         latencyMs: Date.now() - startTime,
       });
 
-      logger.warn({ err, model, attemptNumber: i + 1 }, 'Model failed, trying next in chain');
+      logger.warn(
+        { err, model, attemptNumber: i + 1 },
+        'Model failed, trying next in chain'
+      );
 
-      // If last model in chain, throw
       if (i === chain.length - 1) {
         throw new Error(
           `All models in fallback chain failed: ${chain.join(', ')}`
