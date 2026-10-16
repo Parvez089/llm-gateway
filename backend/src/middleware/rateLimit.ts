@@ -16,6 +16,8 @@ async function loadScript(): Promise<void> {
   if (luaSha) return;
 
   luaScript = await readFile(LUA_PATH, 'utf8');
+
+  // @ts-expect-error - ioredis types don't expose SCRIPT LOAD overload
   luaSha = (await redis.script('LOAD', luaScript)) as string;
 }
 
