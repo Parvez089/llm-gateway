@@ -13,6 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
     "isolatedModules": true,
+    "noUnusedLocals": false,
     "types": ["node", "jest"]
   },
   "include": ["src/**/*", "tests/**/*"],
