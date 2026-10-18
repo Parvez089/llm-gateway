@@ -19,7 +19,10 @@ export async function buildApp() {
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
-  await app.register(cors, { origin: true });
+  await app.register(cors, {
+  origin: 'http://localhost:3000',
+  credentials: true,
+});
   await app.register(helmet);
 
   // Register all routes
