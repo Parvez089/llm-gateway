@@ -17,7 +17,7 @@ async function loadScript(): Promise<void> {
 
   luaScript = await readFile(LUA_PATH, 'utf8');
 
-  // @ts-expect-error - ioredis types don't expose SCRIPT LOAD overload
+  // এখানে @ts-expect-error কমেন্টটি মুছে ফেলা হয়েছে
   luaSha = (await redis.script('LOAD', luaScript)) as string;
 }
 
