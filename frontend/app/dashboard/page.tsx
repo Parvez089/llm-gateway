@@ -46,7 +46,7 @@ export default function DashboardPage() {
         </div>
         <div className="p-6 bg-white border rounded-xl shadow-sm">
           <p className="text-sm text-slate-500">Total Cost</p>
-          <p className="text-3xl font-bold text-slate-900">${data?.totalCostUsd || 0}</p>
+          <p className="text-3xl font-bold text-slate-900">${data?.totalCost || 0}</p>
         </div>
       </div>
     </div>
