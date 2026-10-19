@@ -1,6 +1,6 @@
 // frontend/components/landing/Footer.tsx
 import Link from "next/link";
-import { Github, ShieldCheck, Star } from "lucide-react";
+import {  ShieldCheck, Star } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear(); // ডাইনামিক বছর (যেমন: ২০২৫ বা ২০২৬)
@@ -108,11 +108,7 @@ export function Footer() {
                   <li key={link.name}>
                     <Link href={link.href} target={link.isGithub ? "_blank" : "_self"} className="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5">
                       {link.name}
-                      {link.isGithub && (
-                        <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 border border-slate-200">
-                          <Star className="h-3 w-3" /> 2.4k
-                        </span>
-                      )}
+                    
                     </Link>
                   </li>
                 ))}
