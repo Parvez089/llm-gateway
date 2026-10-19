@@ -2,6 +2,7 @@
 
 // frontend/components/landing/Footer.tsx
 import Link from "next/link";
+import { FaGithub } from "react-icons/fa";
 
 const GITHUB_URL = "https://github.com/Parvez089/llm-gateway";
 
@@ -10,7 +11,12 @@ const GITHUB_URL = "https://github.com/Parvez089/llm-gateway";
 // Update this once a year, or use a range like "2026-2027".
 const COPYRIGHT_YEAR = 2026;
 
-type FooterLink = { name: string; href: string; external?: boolean };
+type FooterLink = {
+  name: string;
+  href: string;
+  external?: boolean;
+  isGithub?: boolean;
+};
 
 // Only link to things that actually exist.
 // Anchors start with "/" so they also work from other pages such as /demo.
@@ -29,7 +35,7 @@ const footerLinks: Record<"product" | "resources" | "community", FooterLink[]> =
       { name: "Playground", href: "/demo" },
     ],
     community: [
-      { name: "GitHub Repo", href: GITHUB_URL, external: true },
+      { name: "GitHub Repo", href: GITHUB_URL, external: true, isGithub: true },
       { name: "Report an Issue", href: `${GITHUB_URL}/issues`, external: true },
       {
         name: "License (MIT)",
@@ -88,7 +94,8 @@ export function Footer() {
                           target: "_blank",
                           rel: "noopener noreferrer",
                         })}
-                        className='text-sm text-slate-500 transition-colors hover:text-slate-900'>
+                        className='flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-slate-900'>
+                        {link.isGithub && <FaGithub className='h-4 w-4' />}
                         {link.name}
                       </Link>
                     </li>
