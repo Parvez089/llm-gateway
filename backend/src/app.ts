@@ -20,9 +20,12 @@ export async function buildApp() {
   app.setSerializerCompiler(serializerCompiler);
 
   await app.register(cors, {
-  origin: 'http://localhost:3000',
+ origin: [
+    'http://localhost:3000', 
+    'https://llm-gateway-dev.vercel.app' 
+  ],
   credentials: true,
-});
+}); 
   await app.register(helmet);
 
   // Register all routes
