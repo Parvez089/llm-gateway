@@ -1,5 +1,5 @@
 // frontend/components/landing/Navbar.tsx
-"use client"; // needed for mobile menu state and the GitHub star fetch
+"use client";
 
 import Link from "next/link";
 import { Star, Menu, X } from "lucide-react";
@@ -9,8 +9,6 @@ import { useEffect, useState } from "react";
 const GITHUB_REPO = "Parvez089/llm-gateway";
 const GITHUB_URL = `https://github.com/${GITHUB_REPO}`;
 
-// Turn a section on only when it has real content.
-// Benchmarks stays off until the k6 + routing eval results exist.
 const navLinks = [
   { name: "Architecture", href: "#architecture", enabled: true },
   { name: "Features", href: "#features", enabled: true },
@@ -22,8 +20,6 @@ function formatStars(count: number): string {
   return count >= 1000 ? `${(count / 1000).toFixed(1)}k` : String(count);
 }
 
-// Fetches the real star count. If the request fails (rate limit, offline),
-// returns null and the badge is simply hidden, never a fake number.
 function useGithubStars(): number | null {
   const [stars, setStars] = useState<number | null>(null);
 
@@ -39,9 +35,7 @@ function useGithubStars(): number | null {
           setStars(data.stargazers_count);
         }
       })
-      .catch(() => {
-        /* ignore: badge stays hidden */
-      });
+      .catch(() => {});
 
     return () => controller.abort();
   }, []);
@@ -50,7 +44,6 @@ function useGithubStars(): number | null {
 }
 
 function StarBadge({ stars }: { stars: number | null }) {
-  // Hide the badge when there are no stars yet or the fetch failed.
   if (!stars) return null;
 
   return (
@@ -70,13 +63,16 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4">
-        {/* Left: logo (flex-1 keeps the center nav truly centered) */}
+        
+        {/* Left: logo */}
         <div className="flex flex-1 items-center">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="text-lg font-bold tracking-tight text-slate-900">
+            {/* 💡 whitespace-nowrap যোগ করা হয়েছে যাতে টেক্সট দুই লাইনে না ভাঙে */}
+            <span className="text-lg font-bold tracking-tight text-slate-900 whitespace-nowrap">
               LLM Gateway
             </span>
-            <span className="ml-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-[10px] text-slate-500">
+            {/* 💡 মোবাইলে v0.1.0 ব্যাজটি লুকিয়ে রাখতে hidden sm:inline-flex ব্যবহার করা হলো */}
+            <span className="hidden sm:inline-flex ml-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-[10px] text-slate-500 whitespace-nowrap">
               v0.1.0
             </span>
           </Link>
@@ -88,7 +84,7 @@ export function Navbar() {
             <Link
               key={link.name}
               href={link.href}
-              className="transition-colors hover:text-slate-900"
+              className="transition-colors hover:text-slate-900 whitespace-nowrap"
             >
               {link.name}
             </Link>
@@ -98,7 +94,7 @@ export function Navbar() {
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 transition-colors hover:text-slate-900"
+            className="flex items-center gap-1.5 transition-colors hover:text-slate-900 whitespace-nowrap"
           >
             <FaGithub className="h-4 w-4" />
             GitHub
@@ -106,11 +102,11 @@ export function Navbar() {
           </Link>
         </nav>
 
-        {/* Right: actions (flex-1 + justify-end mirrors the left block) */}
+        {/* Right: actions */}
         <div className="flex flex-1 items-center justify-end gap-3">
           <Link
             href="/playground"
-            className="hidden h-9 items-center justify-center rounded-lg bg-blue-600 px-5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 sm:inline-flex"
+            className="hidden h-9 items-center justify-center rounded-lg bg-blue-600 px-5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 sm:inline-flex whitespace-nowrap"
           >
             Try the Playground
           </Link>
@@ -163,7 +159,7 @@ export function Navbar() {
 
             <div className="px-2">
               <Link
-                href="/demo"
+                href="/playground"
                 onClick={closeMenu}
                 className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 px-6 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
               >
