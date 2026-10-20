@@ -47,7 +47,6 @@ export default function RootLayout({
         <QueryProvider>
           <TooltipProvider>
              <DevWarningModal/>
-              <GridLines />
              <div className="relative z-10 flex min-h-screen flex-col ">
                 <Navbar />
                 <main className="flex-1">

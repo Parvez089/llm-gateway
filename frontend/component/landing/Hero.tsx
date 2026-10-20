@@ -53,7 +53,7 @@ export function Hero() {
       {/* CTA buttons */}
       <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:flex-row">
         <Link
-          href="/demo"
+          href="/playground"
           className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-6 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
         >
           <Play className="h-4 w-4" />

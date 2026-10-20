@@ -109,7 +109,7 @@ export function Navbar() {
         {/* Right: actions (flex-1 + justify-end mirrors the left block) */}
         <div className="flex flex-1 items-center justify-end gap-3">
           <Link
-            href="/demo"
+            href="/playground"
             className="hidden h-9 items-center justify-center rounded-lg bg-blue-600 px-5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 sm:inline-flex"
           >
             Try the Playground
